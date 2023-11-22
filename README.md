@@ -6,7 +6,7 @@ Thomas A. Clay, Michael de L. Brooke
 
 The following repository contains codes to derive spatial locations based on light-based geolocator for Stejneger's petrels Pterodroma longirostris, in revision in Marine Biology. DOI: X
 
-We based our process on the manual published by Lisovski et al. (2020) Light-Level Geolocator Analyses: A user’s guide. Journal of Animal Ecology 89:221-236. DOI: 10.1111/1365-2656.13036
+We based our process on the manual published by Lisovski et al. (2020) Light-Level Geolocator Analyses: A user’s guide. Journal of Animal Ecology 89:221-236. DOI: 10.1111/1365-2656.13036. https://geolocationmanual.vogelwarte.ch/
 
 Raw light data and twilights, as well as processed geolocator locations, can be viewed and/or downloaded via a Movebank Data Repository: Clay TA, Brooke MdeL. (X). Data from: Trans-equatorial migration links oceanic frontal habitats across the Pacific Ocean: year-round movements and foraging activity of s small gadfly petrel. Movebank Data Repository. https://doi.org/X
 
