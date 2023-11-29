@@ -10,7 +10,7 @@ We based our process on the manual published by Lisovski et al. (2020) Light-Lev
 
 Raw light data and twilights, as well as processed geolocator locations, can be viewed and/or downloaded in the Movebank Data Repository: Clay TA, Brooke M de L. (2024). Data from: Trans-equatorial migration links oceanic frontal habitats across the Pacific Ocean: year-round movements and foraging activity of a small gadfly petrel. Movebank Data Repository. https://doi.org/10.5441/001/1.301
 
-Calibration periods are available in the "Data_inputs" folder. We suggest you paste ".lux" files from the Movebank Data Repository into the "./Data_inputs/Raw Light" folder and twilight ".csv" files in the "./Data_outputs/Full twilights" folder.
+The timing of geolocator calibration periods are available in the "Data_inputs" folder. We suggest you paste the ".lux" files from the Movebank Data Repository into the "./Data_inputs/Raw Light" folder and twilight ".csv" files into the "./Data_outputs/Full twilights" folder.
 
 ## General statement (please read before using data)
 
