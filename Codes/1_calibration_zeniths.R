@@ -89,7 +89,7 @@ write.csv(out_df, out_name)
 
 
 
-#### 2. START CALIBRATION ####
+#### 2. END CALIBRATION ####
 
 # load in light data, crop calibration, annotate twilights and paste out - a manual process
 
@@ -187,10 +187,6 @@ range(zen)
 # 93.04323 94.50927
 range(zen0)
 # 95.10534 104.68340
-
-
-
-##### 3C. PASTE OUT ######
 
 
 out_df <- data.frame(File = files, ID = gsub(".lux", "", files),

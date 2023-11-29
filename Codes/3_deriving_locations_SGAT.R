@@ -127,7 +127,7 @@ for (i in 1:length(twilights)) {
   mask <- earthseaMask(xlim, ylim, n = 1, pacific = TRUE)
   log.prior <- function(p) {
     f <- mask(p)
-    ifelse(f | is.na(f), -100, 0)
+    ifelse(f | is.na(f), -100, -100) # giving these very small probability of occurences of being on land
   }
   
   
@@ -160,8 +160,8 @@ for (i in 1:length(twilights)) {
     x0 <- chainLast(fit$x)
     z0 <- chainLast(fit$z)
     
-    model <- thresholdModel(twilight = tw[[i]]$Twilight,
-                            rise = tw[[i]]$Rise,
+    model <- thresholdModel(twilight = twl[[i]]$Twilight,
+                            rise = twl[[i]]$Rise,
                             twilight.model = "Gamma",
                             alpha = c(zen$alpha_mean[i], zen$alpha_sd[i]),
                             beta = beta,
@@ -171,8 +171,8 @@ for (i in 1:length(twilights)) {
                             zenith = zen$zen0[i],
                             fixedx = fixedx)
     
-    x.proposal <- mvnorm(S = diag(c(0.005, 0.005)), n = nrow(tw[[i]]))
-    z.proposal <- mvnorm(S = diag(c(0.005, 0.005)), n = nrow(tw[[i]]) - 1)
+    x.proposal <- mvnorm(S = diag(c(0.005, 0.005)), n = nrow(twl[[i]]))
+    z.proposal <- mvnorm(S = diag(c(0.005, 0.005)), n = nrow(twl[[i]]) - 1)
     #A number of short runs are conducted to tune the proposals. At the end of each run, new proposal distributions are defined based on the dispersion observed in the previous run.
     
     for (k in 1:3) {
@@ -199,7 +199,7 @@ for (i in 1:length(twilights)) {
     both <- plot_grid(p1, p2, nrow =2)
     print(both)
     # paste out
-    out_name <- paste0(plot_mcmc, gsub(" ", "_", in_df$Folder[i]),"_", "iter_", a,  ".png")
+    out_name <- paste0(plot_mcmc, gsub(" ", "_", gsub(".csv", "", twilights[i])),"_", "iter_", a,  ".png")
     ggsave(out_name, width = 2000, height = 1500, units = "px", dpi = 300)
     dev.off()
     
@@ -214,10 +214,10 @@ for (i in 1:length(twilights)) {
     # SUMMARIZE  AND PASTE OUT #
     
     sm <- locationSummary(fit$z, time=fit$model$time)
-    sm$ID <- in_df$Folder[i]
+    sm$ID <- gsub(".csv", "", twilights[i])
     sm$Iter <- a
     
-    out_name <- paste0(track_dir,  gsub(" ", "_", in_df$Folder[i]),"_", "iter_", a, ".csv")
+    out_name <- paste0(track_dir,  gsub(" ", "_", gsub(".csv", "", twilights[i])),"_", "iter_", a, ".csv")
     write.csv(sm, out_name)
     
     
@@ -232,7 +232,7 @@ for (i in 1:length(twilights)) {
       ggtitle(paste(zen$ID[i], a, sep = " "))
     print(p1)
     # paste out
-    out_name <- paste0(map_whole_m, gsub(" ", "_", in_df$Folder[i]),"_", "iter_", a, ".png")
+    out_name <- paste0(map_whole_m, gsub(" ", "_", gsub(".csv", "", twilights[i])),"_", "iter_", a, ".png")
     ggsave(out_name, width = 2000, height = 1500, units = "px", dpi = 300)
     dev.off()
   }
@@ -240,115 +240,13 @@ for (i in 1:length(twilights)) {
 
 
 
-##### 6. CREATE EQUINOX AND ZOOMED IN PLOTS PER INDIVIDUAL ###########
 
 
-
-# load in geolocator files
-f_direx <- "./GLS paper(s)/Data_outputs/GLS_processing/SGAT full tracks/longirostris/"
-files <- dir(f_direx)
-
-# specifying equinox periods
-sep_eq_1 <- as.Date("2020-09-22")
-sep_eq_2 <- as.Date("2021-09-22")
-mar_eq_1 <- as.Date("2020-03-19")
-mar_eq_2 <- as.Date("2021-03-20")
-
-# donwload world map
-mapworld <- map_data("world", wrap = c(0, 360), ylim = c(-75,75))
-
-# plot outputs
-map_whole_eq <- "./GLS paper(s)/Plots/GLS processing/Running SGAT whole tracks/longirostris/Whole extent equinox map/"
-map_se_pac <- "./GLS paper(s)/Plots/GLS processing/Running SGAT whole tracks/longirostris/SE pacific month map/"
-
-# months of interest for breeding
-months <- c(11, 12, 1, 2, 3, 4)
-
-f_l <-list()
-for (i in 1:length(files)) {
-  f_l[[i]] <- read.csv(paste0(f_direx, files[i]))
-  print(paste(f_l[[i]]$ID[1], f_l[[i]]$Iter[1], sep = "..."))
-  f_l[[i]]$Time1 <- as.POSIXct(f_l[[i]]$Time1, tz = "GMT")
-  f_l[[i]]$Time2 <- as.POSIXct(f_l[[i]]$Time2, tz = "GMT")
-  # averaging two times
-  f_l[[i]]$Date_time <- f_l[[i]]$Time1
-  for (a in 1:nrow(f_l[[i]])) {
-    f_l[[i]]$Date_time[a] <- mean(c(f_l[[i]]$Time1[a], f_l[[i]]$Time2[a]))
-  }
-  f_l[[i]]$Date <- as.Date(substr(f_l[[i]]$Date_time, 1, 10))
-  # setting 3 weeks either side of equinox period - per week
-  f_l[[i]]$Eq <- "No"
-  # first autumn equinox
-  f_l[[i]]$Eq[f_l[[i]]$Date > (sep_eq_1-21) & f_l[[i]]$Date <= (sep_eq_1-14)] <- "-3wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (sep_eq_1-14) & f_l[[i]]$Date <= (sep_eq_1-7)] <- "-2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (sep_eq_1-7) & f_l[[i]]$Date <= (sep_eq_1)] <- "-1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (sep_eq_1+7) & f_l[[i]]$Date >= (sep_eq_1)] <- "+1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (sep_eq_1+14) & f_l[[i]]$Date >= (sep_eq_1+7)] <- "+2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (sep_eq_1+21) & f_l[[i]]$Date >= (sep_eq_1+14)] <- "+3wks"
-  # second autumn equinox
-  f_l[[i]]$Eq[f_l[[i]]$Date > (sep_eq_2-21) & f_l[[i]]$Date <= (sep_eq_2-14)] <- "-3wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (sep_eq_2-14) & f_l[[i]]$Date <= (sep_eq_2-7)] <- "-2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (sep_eq_2-7) & f_l[[i]]$Date <= (sep_eq_2)] <- "-1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (sep_eq_2+7) & f_l[[i]]$Date >= (sep_eq_2)] <- "+1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (sep_eq_2+14) & f_l[[i]]$Date >= (sep_eq_2+7)] <- "+2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (sep_eq_2+21) & f_l[[i]]$Date >= (sep_eq_2+14)] <- "+3wks"
-  # first spring equinox
-  f_l[[i]]$Eq[f_l[[i]]$Date > (mar_eq_1-21) & f_l[[i]]$Date <= (mar_eq_1-14)] <- "-3wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (mar_eq_1-14) & f_l[[i]]$Date <= (mar_eq_1-7)] <- "-2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (mar_eq_1-7) & f_l[[i]]$Date <= (mar_eq_1)] <- "-1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (mar_eq_1+7) & f_l[[i]]$Date >= (mar_eq_1)] <- "+1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (mar_eq_1+14) & f_l[[i]]$Date >= (mar_eq_1+7)] <- "+2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (mar_eq_1+21) & f_l[[i]]$Date >= (mar_eq_1+14)] <- "+3wks"
-  # second spring equinox
-  f_l[[i]]$Eq[f_l[[i]]$Date > (mar_eq_2-21) & f_l[[i]]$Date <= (mar_eq_2-14)] <- "-3wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (mar_eq_2-14) & f_l[[i]]$Date <= (mar_eq_2-7)] <- "-2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date > (mar_eq_2-7) & f_l[[i]]$Date <= (mar_eq_2)] <- "-1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (mar_eq_2+7) & f_l[[i]]$Date >= (mar_eq_2)] <- "+1wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (mar_eq_2+14) & f_l[[i]]$Date >= (mar_eq_2+7)] <- "+2wks"
-  f_l[[i]]$Eq[f_l[[i]]$Date < (mar_eq_2+21) & f_l[[i]]$Date >= (mar_eq_2+14)] <- "+3wks"
-  f_l[[i]]$Eq <- as.factor(as.character(f_l[[i]]$Eq))
-  
-  # EQUINOX PLOT
-  f_l[[i]]$Lon2 <- f_l[[i]]$Lon.mean
-  f_l[[i]]$Lon2[f_l[[i]]$Lon2<0] <- f_l[[i]]$Lon2[f_l[[i]]$Lon2<0] +360
-  p1 <- ggplot(f_l[[i]][f_l[[i]]$Lat.mean<90,], aes(Lon2, Lat.mean)) + 
-    geom_polygon(data = mapworld, aes(x = long, y = lat, group = group), col = "grey50", fill = "grey70") +
-    geom_path(colour = "grey50") + geom_point(aes(colour = Eq), size = 0.9) + 
-    scale_color_manual(values = c("#1B98E0FF", "#1B98E08C", "#1B98E04D", "#DC2323", "#E34F4F", "#F1A7A7", "grey30")) +
-    theme_bw() + coord_fixed(xlim = c(120, 300), ylim = c(-65, 50))+
-    ggtitle(paste(f_l[[i]]$ID[1], f_l[[i]]$Iter[1], sep = " "))
-  print(p1)
-  # paste out
-  out_name <- paste0(map_whole_eq, gsub(" ", "_", f_l[[i]]$ID[1]),"_", "iter_", f_l[[i]]$Iter[1], ".png")
-  ggsave(out_name, width = 2000, height = 1500, units = "px", dpi = 300)
-  dev.off()
-  
-  # ZOOMED IN BREEDING SEASON PLOT
-  f_l[[i]]$Month <- as.numeric(as.character(substr(f_l[[i]]$Date, 6, 7)))
-  # subset just breeding months
-  br <- subset(f_l[[i]], Month %in% months,)
-  p1 <- ggplot(br[br$Lat.mean<90,], aes(Lon2, Lat.mean)) + 
-    geom_polygon(data = mapworld, aes(x = long, y = lat, group = group), col = "grey50", fill = "grey70") +
-    geom_path(colour = "grey50") + geom_point(aes(colour = as.factor(Month)), size = 1) + 
-    theme_bw() + coord_fixed(xlim = c(220, 300), ylim = c(-65, 0)) +
-    ggtitle(paste(f_l[[i]]$ID[1], f_l[[i]]$Iter[1], sep = " "))
-  print(p1)
-  # paste out
-  out_name <- paste0(map_se_pac , gsub(" ", "_", f_l[[i]]$ID[1]),"_", "iter_", f_l[[i]]$Iter[1], ".png")
-  ggsave(out_name, width = 2000, height = 1500, units = "px", dpi = 300)
-  dev.off()
-}
-
-
-
-
-
-
-#### 7 PLOTTING ALL TRACKS TOGETHER #####
+#### 5. PLOTTING ALL ITERATIONS TOGETHER FOR EACH INDIVIDUAL ####
 
 
 # load in geolocator files
-f_direx <- "./GLS paper(s)/Data_outputs/GLS_processing/SGAT full tracks/longirostris/"
+f_direx <- "./Data_outputs/SGAT full tracks/"
 files <- dir(f_direx)
 
 # download world map
@@ -364,7 +262,7 @@ all$Lon2 <- all$Lon.mean
 all$Lon2[all$Lon2<0] <- all$Lon2[all$Lon2<0] +360
 
 # plot for each individual
-map_whole <- "./GLS paper(s)/Plots/GLS processing/Running SGAT whole tracks/longirostris/"
+map_whole <- "./Plots/"
 
 for (i in 1:nlevels(all$ID)) {
   print(i)
