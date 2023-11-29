@@ -20,7 +20,7 @@ The archived files (in the repostory listed above) contain data derived from fie
 
 ## Codes
 
-Here are the main codes in R to reproduce the locations in the aforementioned paper.
+Here are the main codes in R to reproduce the locations using the TwGeos and SGAT R packages in the aforementioned paper.
 
 - **1_calibration_zeniths.r**: Code to crop light files to get calibration periods, identify twilights and obtain sun elevation angles (zeniths).
 - **2_deriving_annotating_twilights_manual.r**: Code to manually derive twilights from the whole track and manually check and correct based on visualizing light curves.
