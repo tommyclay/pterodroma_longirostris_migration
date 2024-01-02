@@ -4,7 +4,7 @@ Thomas A. Clay, Michael de L. Brooke
 
 ## Overview and data
 
-The following repository contains codes to derive spatial locations based on light-based geolocation for Stejneger's petrels Pterodroma longirostris, in revision in Marine Biology. DOI: X
+The following repository contains codes to derive spatial locations based on light-based geolocation for Stejneger's petrels Pterodroma longirostris, published in Marine Biology (Clay & Brooke 2024). https://doi.org/10.1007/s00227-023-04373-3
 
 We based our process on the manual published by Lisovski et al. (2020) Light-Level Geolocator Analyses: A user’s guide. Journal of Animal Ecology 89:221-236. DOI: 10.1111/1365-2656.13036. See https://geolocationmanual.vogelwarte.ch/ for details. 
 
