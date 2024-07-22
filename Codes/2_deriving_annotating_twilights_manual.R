@@ -15,7 +15,7 @@ meta$deploy_datetime <- as.POSIXct(paste(as.Date(strptime(meta$deploy_date, form
 meta$retrieve_datetime <- as.POSIXct(paste(as.Date(strptime(meta$retrieve_date, format = "%d/%m/%Y")), meta$retrieve_time_UTC, sep = " "), tz = "UTC")
 
 
-#### MANUALLY ITERATE THROUGH AND ANNOTATE AND CORRET TWILIGHTS ####
+#### MANUALLY ITERATE THROUGH AND ANNOTATE AND CORRECT TWILIGHTS ####
 
 
 threshold <- 2 # threshold in light
